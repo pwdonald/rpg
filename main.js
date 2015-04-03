@@ -1,4 +1,4 @@
-var FPS = 30,
+var FPS = 60,
 	canvas = document.getElementById('screen'),
 	ctx = canvas.getContext('2d'),
 	map = new TileMap(),
@@ -24,7 +24,7 @@ var Player = function(tileX, tileY, name, type, exp, gold, items, actor) {
 	this.exp = exp || 0;
 	this.items = items || [];
 	this.controllable = true;
-	this.maxVelocity = 2;
+	this.maxVelocity = 1;
 	this.movementSpeed = 1;
 	this.size = map.tileSize || 32;
 	this.draw = function(ctx) {
@@ -48,6 +48,10 @@ var keysDown = {
 	right: false,
 	up: false,
 	down: false
+};
+
+var mouseDown = {
+	right: false
 };
 
 ctx.translate(0.5, 0.5);
@@ -107,31 +111,23 @@ function handleKeys() {
 		var actor = actors[i];
 		if (actor.controllable) {
 			if (keysDown.left) {
-				var newTileX = actor.tileX - 1,
-					newTileY = actor.tileY;
-				if (newTileX > 0) {
-					if (!map.data[newTileX][newTileY].collide) {
-						actor.moveLeft();
-					}
-				}
+				actor.moveLeft();
 			}
 
 			if (keysDown.right) {
-				if (!map.data[actor.tileX + 1][actor.tileY].collide) {
-					actor.moveRight();
-				}
+				actor.moveRight();
 			}
 
 			if (keysDown.up) {
-				if (!map.data[actor.tileX][actor.tileY - 1].collide) {
-					actor.moveUp();
-				}
+				actor.moveUp();
 			}
 
 			if (keysDown.down) {
-				if (!map.data[actor.tileX][actor.tileY + 1].collide) {
-					actor.moveDown();
-				}
+				actor.moveDown();
+			}
+
+			if (mouseDown.right) {
+				actor.mouseMove();
 			}
 		}
 	}
@@ -172,5 +168,28 @@ window.addEventListener("keyup", function(e) {
 		keysDown.down = false;
 	}
 });
+
+/* window.addEventListener('mousedown', function(evt) {
+	if (evt.button === 2) {
+		mouseDown.right = true;
+	}
+});
+
+window.addEventListener('mouseup', function(evt) {
+	if (evt.button === 2) {
+		mouseDown.right = false;
+	}
+}); */
+
+canvas.oncontextmenu = function(e) {
+	return false;
+};
+
+/* canvas.addEventListener('mousemove', function(evt) {
+	var rect = canvas.getBoundingClientRect();
+	var mouseX = evt.offsetX;
+	var mouseY = evt.offsetY;
+	player.target(mouseX, mouseY);
+}); */
 
 drawScreen();
