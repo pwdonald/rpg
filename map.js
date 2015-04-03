@@ -26,6 +26,10 @@ var TileMap = (function() {
 			
 			for (var y = 0; y < this.height; y++) {
 				var newTile = new Tile();
+				if (x === 0 || y === 0) {
+					newTile.collide = true;
+					newTile.type = 'black';
+				}
 				this.data[x].push(newTile);
 			}
 		}

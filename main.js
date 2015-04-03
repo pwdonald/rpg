@@ -1,11 +1,9 @@
-var FPS = 60,
+var FPS = 30,
 	canvas = document.getElementById('screen'),
 	ctx = canvas.getContext('2d'),
 	map = new TileMap(),
 	physics = PhysicsEngine,
 	DEBUG = true;
-
-physics.FRICTION = 1;
 
 var viewport = {
 	x: 0,
@@ -15,15 +13,20 @@ var viewport = {
 };
 
 
-var Player = function(name, type, exp, gold, items, actor) {
-	physics.Actor.apply(this, arguments);
+var Player = function(tileX, tileY, name, type, exp, gold, items, actor) {
+	physics.Actor.apply(this);
+	this.tileX = tileX || 0;
+	this.tileY = tileY || 0;
+	this.x = this.tileX * this.size;
+	this.y = this.tileY * this.size;
 	this.name = name || 'Default Player';
 	this.type = type || 'Peasant';
 	this.exp = exp || 0;
 	this.items = items || [];
 	this.controllable = true;
-	this.maxVelocity = 4;
+	this.maxVelocity = 2;
 	this.movementSpeed = 1;
+	this.size = map.tileSize || 32;
 	this.draw = function(ctx) {
 		ctx.beginPath();
 		ctx.fillStyle = 'blue';
@@ -37,7 +40,7 @@ Player.prototype = physics.Actor;
 Player.prototype.constructor = Player;
 
 // var player = new physics.newActor(0, 0, 0, 0, 2, 1, true),
-var player = new Player(),
+var player = new Player(2, 2),
 	actors = physics.actors;
 
 var keysDown = {
@@ -75,6 +78,7 @@ function drawTile(x, y, tileSize, tile) {
 }
 
 function drawVisibleMap() {
+	physics.blockers = [];
 	for (var x = viewport.x; x < viewport.x + Math.round(canvas.width / map.tileSize); x++) {
 		for (var y = viewport.y; y < viewport.y + Math.round(canvas.height / map.tileSize); y++) {
 			drawTile(x, y, map.tileSize, map.data[x][y]);
@@ -103,19 +107,31 @@ function handleKeys() {
 		var actor = actors[i];
 		if (actor.controllable) {
 			if (keysDown.left) {
-				actor.moveLeft();
+				var newTileX = actor.tileX - 1,
+					newTileY = actor.tileY;
+				if (newTileX > 0) {
+					if (!map.data[newTileX][newTileY].collide) {
+						actor.moveLeft();
+					}
+				}
 			}
 
 			if (keysDown.right) {
-				actor.moveRight();
+				if (!map.data[actor.tileX + 1][actor.tileY].collide) {
+					actor.moveRight();
+				}
 			}
 
 			if (keysDown.up) {
-				actor.moveUp();
+				if (!map.data[actor.tileX][actor.tileY - 1].collide) {
+					actor.moveUp();
+				}
 			}
 
 			if (keysDown.down) {
-				actor.moveDown();
+				if (!map.data[actor.tileX][actor.tileY + 1].collide) {
+					actor.moveDown();
+				}
 			}
 		}
 	}
